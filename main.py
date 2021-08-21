@@ -1,3 +1,5 @@
+from math import sqrt
+
 def construir_estado_inicial(cidades):
   pass
 
@@ -36,5 +38,27 @@ def tempera_simulada(cidades):
 
     t += 1
 
+def calcular_distancia(a, b):
+  return sqrt((float(a[0]) - float(b[0]))**2 + (float(a[1]) - float(b[1]))**2)
+
+def calcular_distancias(arquivo):
+  matriz_distancias = []
+
+  f = open(arquivo)
+  linhas = [line.rstrip() for line in f]
+  f.close()
+  cidades = [city.split(' ') for city in linhas]
+
+  for cidade in cidades:
+    distancias = []
+
+    for destino in cidades:
+      distancias.append(calcular_distancia([cidade[1], cidade[2]], [destino[1], destino[2]]))
+
+    matriz_distancias.append(distancias)
+
+  return matriz_distancias
+
 if __name__ == "__main__":
-    tempera_simulada([])
+  matriz_distancias = calcular_distancias("dj38.tsp")
+  tempera_simulada([])
