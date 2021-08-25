@@ -1,57 +1,49 @@
-from math import exp, sqrt
-from random import sample, random
+from math import sqrt, ceil
+from random import sample
+from heapq import heappush, heappop
 
 DISTANCIAS = []
 
 def construir_estado_inicial(cidades):
-  return list(range(0, len(cidades)))
-
-def calcular_temperatura(t):
-  if(t <= 5):
-    return 10
-  elif t <= 9:
-    return 5
-  return 0
-
-def escolher_sucessor(no_atual):
-  return sample(no_atual, len(no_atual))
+  return sample(list(range(0, len(cidades))), len(cidades))
 
 def calcular_valor(no):
   valor = 0
   for i in range(0, len(no) - 1):
-    valor += DISTANCIAS[i][i+1]
+    origem = no[i]
+    destino = no[i+1]
+    valor += DISTANCIAS[origem][destino]
   return valor
 
-def probabilidade_aleatoria():
-  return random()
+def escolher_sucessor(no_atual):
+  estados = []
+  
+  for i in range(0, len(no_atual) - 1):
+    estado_candidato = no_atual.copy()
+    aux = estado_candidato[i + 1]
+    estado_candidato[i + 1] = estado_candidato[i]
+    estado_candidato[i] = aux
+    heappush(estados, (calcular_valor(estado_candidato), estado_candidato))
+    
+  return heappop(estados)[1]
 
-def calcular_probabilidade_no(delta_e, T):
-  return exp(delta_e/T)
-
-def tempera_simulada(cidades):
-  no_atual = construir_estado_inicial(cidades)
+def subida_encosta(cidades):
+  no_inicial = construir_estado_inicial(cidades)
+  no_atual = no_inicial
   t = 0
 
   while True:
-    T = calcular_temperatura(t)
-    
-    if T == 0:
-      return no_atual
-
     proximo_no = escolher_sucessor(no_atual)
     delta_e = calcular_valor(proximo_no) - calcular_valor(no_atual)
 
-    if delta_e > 0:
-      no_atual = proximo_no
-    elif probabilidade_aleatoria() < calcular_probabilidade_no(delta_e, T):
-      no_atual = proximo_no
+    if delta_e >= 0:
+      return [no_inicial, proximo_no]
+    no_atual = proximo_no
 
     t += 1
 
-    print(no_atual, calcular_valor(no_atual))
-
 def calcular_distancia(a, b):
-  return sqrt((float(a[0]) - float(b[0]))**2 + (float(a[1]) - float(b[1]))**2)
+  return ceil(sqrt((float(a[0]) - float(b[0]))**2 + (float(a[1]) - float(b[1]))**2))
 
 def calcular_distancias(arquivo):
   f = open(arquivo)
@@ -67,5 +59,16 @@ def calcular_distancias(arquivo):
     DISTANCIAS.append(distancias)
 
 if __name__ == "__main__":
-  calcular_distancias("dj38.tsp")
-  tempera_simulada(list(range(0, 38)))
+  calcular_distancias("uy734.tsp")
+  lista_cidades = list(range(0, len(DISTANCIAS)))
+  
+  for i in range(1, 10):
+    [inicio, fim] = subida_encosta(lista_cidades)
+    print('-------------', 'EXECUÇÃO', i, '-------------',)
+    print('------ PRIMEIRA ITERACAO -------')
+    print('Percurso', [cidade + 1 for cidade in inicio])
+    print('Distancia total', calcular_valor(inicio))
+    print('------ ULTIMA ITERACAO -------')
+    print('Percurso', [cidade + 1 for cidade in fim])
+    print('Distancia total', calcular_valor(fim))
+    print()
