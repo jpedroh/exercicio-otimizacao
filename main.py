@@ -1,6 +1,5 @@
-from math import sqrt, ceil
-from random import sample
-from heapq import heappush, heappop
+from math import exp, sqrt, ceil
+from random import choice, random, sample
 
 DISTANCIAS = []
 
@@ -23,23 +22,30 @@ def escolher_sucessor(no_atual):
     aux = estado_candidato[i + 1]
     estado_candidato[i + 1] = estado_candidato[i]
     estado_candidato[i] = aux
-    heappush(estados, (calcular_valor(estado_candidato), estado_candidato))
+    estados.append(estado_candidato)
     
-  return heappop(estados)[1]
+  return choice(estados)
 
-def subida_encosta(cidades):
+def tempera_simulada(cidades):
   no_inicial = construir_estado_inicial(cidades)
   no_atual = no_inicial
   t = 0
+  T = 500
 
   while True:
     proximo_no = escolher_sucessor(no_atual)
     delta_e = calcular_valor(proximo_no) - calcular_valor(no_atual)
 
-    if delta_e >= 0:
+    if T <= 0:
       return [no_inicial, proximo_no]
-    no_atual = proximo_no
-
+    elif delta_e < 0:
+      no_atual = proximo_no
+    elif random() <= exp(-delta_e / T):
+      no_atual = proximo_no
+      
+    print(calcular_valor(no_atual))
+     
+    T -= 0.075
     t += 1
 
 def calcular_distancia(a, b):
@@ -62,13 +68,11 @@ if __name__ == "__main__":
   calcular_distancias("uy734.tsp")
   lista_cidades = list(range(0, len(DISTANCIAS)))
   
-  for i in range(1, 10):
-    [inicio, fim] = subida_encosta(lista_cidades)
-    print('-------------', 'EXECUÇÃO', i, '-------------',)
-    print('------ PRIMEIRA ITERACAO -------')
-    print('Percurso', [cidade + 1 for cidade in inicio])
-    print('Distancia total', calcular_valor(inicio))
-    print('------ ULTIMA ITERACAO -------')
-    print('Percurso', [cidade + 1 for cidade in fim])
-    print('Distancia total', calcular_valor(fim))
-    print()
+  [inicio, fim] = tempera_simulada(lista_cidades)
+  print('------ PRIMEIRA ITERACAO -------')
+  print('Percurso', [cidade + 1 for cidade in inicio])
+  print('Distancia total', calcular_valor(inicio))
+  print('------ ULTIMA ITERACAO -------')
+  print('Percurso', [cidade + 1 for cidade in fim])
+  print('Distancia total', calcular_valor(fim))
+  print()
